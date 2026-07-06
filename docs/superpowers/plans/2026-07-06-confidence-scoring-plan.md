@@ -258,7 +258,7 @@ class TestConfidenceScorer(unittest.TestCase):
                 '{"EC8 Edge Crew": ["betting"]}',
             )
             self._write(
-                tmp_path / ".." / "ACTIVE" / "kimi-chat-scraper" / "profiles" / "EC8 Edge Crew.md",
+                tmp_path / ".." / ".." / "ACTIVE" / "kimi-chat-scraper" / "profiles" / "EC8 Edge Crew.md",
                 "# Profile: EC8 Edge Crew\r\n"
                 "Conversations: 2\r\n"
                 "\r\n"
@@ -267,7 +267,7 @@ class TestConfidenceScorer(unittest.TestCase):
             )
 
             archive = (
-                tmp_path / ".." / "ACTIVE" / "kimi-chat-scraper" / "kimi-chat-archive" / "account1"
+                tmp_path / ".." / ".." / "ACTIVE" / "kimi-chat-scraper" / "kimi-chat-archive" / "account1"
             )
             self._write(
                 archive / "2026-07-03 - Edge" / "chat.json",
