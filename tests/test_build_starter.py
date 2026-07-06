@@ -46,7 +46,7 @@ class TestBuildStarter(unittest.TestCase):
                 "- `/a`: Edge crew odds...\n",
             )
 
-            scraper_root = tmp_path / ".." / "ACTIVE" / "kimi-chat-scraper"
+            scraper_root = tmp_path / ".." / ".." / "ACTIVE" / "kimi-chat-scraper"
             self._write(
                 scraper_root / "profiles" / "EC8 Edge Crew.md",
                 "# Profile: EC8 Edge Crew\r\n"

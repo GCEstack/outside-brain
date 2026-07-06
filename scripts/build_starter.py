@@ -1,10 +1,16 @@
 import argparse
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+# Allow running this script directly from the repo root.
+project_root = Path(__file__).resolve().parents[1]
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 from scripts.config import load_project_domain_map
 from scripts.domain_reader import read_domain_pack
-from scripts.profile_reader import read_profile_section
+from scripts.profile_reader import read_profile_file, read_profile_section
 from scripts.project_parser import parse_project_profile
 
 
@@ -13,11 +19,11 @@ def build_starter(project_root: Path, project_name: str) -> Path:
     domains = mapping.get(project_name, [])
 
     lares_profile_root = project_root.parent / "lares-profile"
-    scraper_root = project_root.parent / "ACTIVE" / "kimi-chat-scraper"
+    scraper_root = project_root.parent.parent / "ACTIVE" / "kimi-chat-scraper"
 
-    persona = read_profile_section(lares_profile_root, "lares-profile", "Persona")
-    voice = read_profile_section(lares_profile_root, "lares-voice", "Voice")
-    memory = read_profile_section(lares_profile_root, "lares-memory", "Memory")
+    persona = read_profile_file(lares_profile_root, "lares-profile")
+    voice = read_profile_file(lares_profile_root, "lares-voice")
+    memory = read_profile_file(lares_profile_root, "lares-memory")
 
     project_profile_path = scraper_root / "profiles" / f"{project_name}.md"
     project_info = parse_project_profile(project_profile_path)
