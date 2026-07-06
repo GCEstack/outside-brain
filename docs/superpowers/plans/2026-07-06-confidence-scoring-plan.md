@@ -317,7 +317,7 @@ from pathlib import Path
 
 from scripts.archive_reader import extract_user_messages, read_chat
 from scripts.config import load_project_domain_map
-from scripts.keyword_builder import build_keywords
+from scripts.keyword_builder import build_keywords, tokenize
 from scripts.project_parser import parse_project_profile
 
 
@@ -330,11 +330,11 @@ def _find_chat_json_files(archive_root: Path) -> list[Path]:
 def _score_conversation(chat_path: Path, keywords: set[str]) -> dict[str, str | int]:
     chat = read_chat(chat_path)
     user_messages = extract_user_messages(chat)
-    user_text = " ".join(user_messages).lower()
+    user_text = " ".join(user_messages)
 
-    matched = {kw for kw in keywords if kw in user_text}
+    matched = keywords & tokenize(user_text)
     total = len(keywords)
-    score = int((len(matched) / total) * 100) if total else 0
+    score = min(int((len(matched) / total) * 100), 100) if total else 0
 
     snippet = ""
     if user_messages:
@@ -430,8 +430,10 @@ from scripts.confidence_scorer import score_project_conversations
     scored = score_project_conversations(project_root, project_name)
     for item in scored:
         date = item["date"][:10] if item["date"] else ""
+        title = str(item["title"]).replace("\r", " ").replace("\n", " ").replace("|", "\\|")
+        snippet = str(item["snippet"]).replace("\r", " ").replace("\n", " ").replace("|", "\\|")
         lines.append(
-            f"| {item['title']} | {date} | {item['score']} | {item['snippet']} |"
+            f"| {title} | {date} | {item['score']} | {snippet} |"
         )
     lines.append("")
 ```
