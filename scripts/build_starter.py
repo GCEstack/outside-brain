@@ -24,9 +24,11 @@ def build_starter(project_root: Path, project_name: str) -> Path:
 
     twin_profile = read_profile_section(project_root, "outside-brain-profile", "Profile")
 
+    now = datetime.now(timezone.utc)
+
     lines = [
         f"# Chat Starter: {project_name}",
-        f"Generated: {datetime.now(timezone.utc).isoformat()}Z",
+        f"Generated: {now.isoformat()}Z",
         "",
         "## Lares Persona & Voice",
         "",
@@ -80,7 +82,7 @@ def build_starter(project_root: Path, project_name: str) -> Path:
         project_root
         / "starters"
         / "pending-review"
-        / f"{project_name} - {datetime.now(timezone.utc).strftime('%Y%m%d')}.md"
+        / f"{project_name} - {now.strftime('%Y%m%d')}.md"
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text("\n".join(lines), encoding="utf-8")

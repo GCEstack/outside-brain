@@ -15,7 +15,7 @@ def read_domain_pack(domain_md_path: Path) -> dict[str, str | list[str]]:
         elif line.startswith("- Apps:"):
             sources = [s.strip() for s in line.replace("- Apps:", "").split(",")]
         elif line.startswith("- `"):
-            snippet = line.split(": ", 1)[1].strip().rstrip(".")
+            snippet = line.split(": ", 1)[1].strip().rstrip(".") if ": " in line else line[2:].strip().rstrip(".")
             snippets.append(snippet)
     return {
         "count": count,
