@@ -9,6 +9,7 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 from scripts.config import load_project_domain_map
+from scripts.confidence_scorer import score_project_conversations
 from scripts.domain_reader import read_domain_pack
 from scripts.profile_reader import read_profile_file, read_profile_section
 from scripts.project_parser import parse_project_profile
@@ -70,6 +71,20 @@ def build_starter(project_root: Path, project_name: str) -> Path:
         for snippet in pack["snippets"][:5]:
             lines.append(f"- {snippet}")
         lines.append("")
+
+    lines.extend([
+        "## Confidence Scores",
+        "",
+        "| Chat | Date | Score | Snippet |",
+        "|------|------|-------|---------|",
+    ])
+    scored = score_project_conversations(project_root, project_name)
+    for item in scored:
+        date = item["date"][:10] if item["date"] else ""
+        lines.append(
+            f"| {item['title']} | {date} | {item['score']} | {item['snippet']} |"
+        )
+    lines.append("")
 
     lines.extend([
         "## Goal for This Chat",

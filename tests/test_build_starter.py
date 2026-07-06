@@ -63,4 +63,5 @@ class TestBuildStarter(unittest.TestCase):
             self.assertIn("EC8 Edge Crew", content)
             self.assertIn("Guardian.", content)
             self.assertIn("Edge crew odds", content)
+            self.assertIn("## Confidence Scores", content)
             self.assertIn("pending-review", str(result))
