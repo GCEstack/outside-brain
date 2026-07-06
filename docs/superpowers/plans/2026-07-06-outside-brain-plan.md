@@ -6,7 +6,7 @@
 
 **Architecture:** Small Python scripts with single responsibilities: config loading, profile reading, project-profile parsing, domain-pack reading, and starter assembly. A CLI entry point composes these pieces and writes markdown to `starters/pending-review/`. Tests use temporary paths so they never touch real archives.
 
-**Tech Stack:** Python 3.14, standard library only, pytest for tests.
+**Tech Stack:** Python 3.14, standard library only (use `unittest` and `tempfile`, no pytest).
 
 ## Global Constraints
 
@@ -155,7 +155,7 @@ def test_load_project_domain_map(tmp_path: Path):
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python -m pytest tests/test_config.py -v
+python -m unittest tests.<module>
 ```
 
 Expected: `ModuleNotFoundError: No module named 'scripts.config'`
@@ -177,7 +177,7 @@ def load_project_domain_map(project_root: Path) -> dict[str, list[str]]:
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python -m pytest tests/test_config.py -v
+python -m unittest tests.<module>
 ```
 
 Expected: PASS
@@ -225,7 +225,7 @@ def test_read_profile_section(tmp_path: Path):
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python -m pytest tests/test_profile_reader.py -v
+python -m unittest tests.<module>
 ```
 
 Expected: `ModuleNotFoundError` or `function not defined`
@@ -254,7 +254,7 @@ def read_profile_section(project_root: Path, profile_name: str, section_name: st
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python -m pytest tests/test_profile_reader.py -v
+python -m unittest tests.<module>
 ```
 
 Expected: PASS
@@ -310,7 +310,7 @@ def test_parse_project_profile(tmp_path: Path):
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python -m pytest tests/test_project_parser.py -v
+python -m unittest tests.<module>
 ```
 
 Expected: `ModuleNotFoundError`
@@ -352,7 +352,7 @@ def parse_project_profile(profile_path: Path) -> dict[str, str | list[str]]:
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python -m pytest tests/test_project_parser.py -v
+python -m unittest tests.<module>
 ```
 
 Expected: PASS
@@ -409,7 +409,7 @@ def test_read_domain_pack(tmp_path: Path):
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python -m pytest tests/test_domain_reader.py -v
+python -m unittest tests.<module>
 ```
 
 Expected: `ModuleNotFoundError`
@@ -448,7 +448,7 @@ def read_domain_pack(domain_md_path: Path) -> dict[str, str | list[str]]:
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python -m pytest tests/test_domain_reader.py -v
+python -m unittest tests.<module>
 ```
 
 Expected: PASS
@@ -533,7 +533,7 @@ Note: This test uses `tmp_path / ".."` to place external fixture roots. Ensure t
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python -m pytest tests/test_build_starter.py -v
+python -m unittest tests.<module>
 ```
 
 Expected: `ModuleNotFoundError` for `scripts.build_starter`
@@ -661,7 +661,7 @@ if __name__ == "__main__":
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python -m pytest tests/test_build_starter.py -v
+python -m unittest tests.<module>
 ```
 
 Expected: PASS
@@ -669,7 +669,7 @@ Expected: PASS
 - [ ] **Step 5: Run full test suite**
 
 ```bash
-python -m pytest tests/ -v
+python -m unittest tests.<module>
 ```
 
 Expected: all tests pass
