@@ -91,11 +91,20 @@ List things that are outdated, duplicated, confusing, off-topic, or no longer re
 Say whatever else you think I should hear before we start clean.
 ```
 
+## Preset Configuration
+
+Create two Kimi saved prompts (presets) with the exact content below.
+
+| Preset Name | Trigger Word | Purpose |
+|-------------|--------------|---------|
+| `Lares Brain Setup` | `🧠` | Cold-start a fresh chat with no prior context. |
+| `Check Memory Reset` | `check memory reset` | Audit an existing chat before wiping it. |
+
 ## Usage
 
 1. Open the Kimi desktop app.
-2. For a fresh start, paste **Prompt A** into a new chat.
-3. For each existing important chat, paste **Prompt B** into that chat.
+2. For a fresh start, type `🧠` in a new chat and send **Prompt A**.
+3. For each existing important chat, type `check memory reset` and send **Prompt B**.
 4. Let Kimi respond fully in each.
 5. Save the responses to markdown files for review before wiping.
 
