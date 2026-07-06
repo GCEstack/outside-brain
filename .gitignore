@@ -1,0 +1,6 @@
+__pycache__/
+.pytest_cache/
+starters/pending-review/*
+starters/ready-to-paste/*
+!starters/pending-review/.gitkeep
+!starters/ready-to-paste/.gitkeep
