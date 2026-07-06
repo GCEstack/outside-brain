@@ -4,9 +4,9 @@
 
 **Goal:** Build a standalone external twin workspace that reads archived chat profiles and Lares domain packs, then generates reviewable project-scoped chat starters.
 
-**Architecture:** Small Python scripts with single responsibilities: config loading, profile reading, project-profile parsing, domain-pack reading, and starter assembly. A CLI entry point composes these pieces and writes markdown to `starters/pending-review/`. Tests use temporary paths so they never touch real archives.
+**Architecture:** Small Python scripts with single responsibilities: config loading, profile reading, project-profile parsing, domain-pack reading, and starter assembly. A CLI entry point composes these pieces and writes markdown to `starters/pending-review/`. Tests use `unittest` and `tempfile` only.
 
-**Tech Stack:** Python 3.14, standard library only (use `unittest` and `tempfile`, no pytest).
+**Tech Stack:** Python 3.14, standard library only (use `unittest` and `tempfile`; no pytest or third-party packages).
 
 ## Global Constraints
 
@@ -136,26 +136,35 @@ git commit -m "chore: scaffold outside-brain workspace"
 `tests/test_config.py`:
 
 ```python
+import json
+import tempfile
+import unittest
 from pathlib import Path
 
 from scripts.config import load_project_domain_map
 
 
-def test_load_project_domain_map(tmp_path: Path):
-    config_dir = tmp_path / "config"
-    config_dir.mkdir()
-    config_path = config_dir / "project_domain_map.json"
-    config_path.write_text('{"EC8 Edge Crew": ["betting", "ec"]}', encoding="utf-8")
+class TestConfigLoader(unittest.TestCase):
+    def test_load_project_domain_map(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            config_dir = tmp_path / "config"
+            config_dir.mkdir()
+            config_path = config_dir / "project_domain_map.json"
+            config_path.write_text(
+                json.dumps({"EC8 Edge Crew": ["betting", "ec"]}),
+                encoding="utf-8",
+            )
 
-    result = load_project_domain_map(tmp_path)
+            result = load_project_domain_map(tmp_path)
 
-    assert result == {"EC8 Edge Crew": ["betting", "ec"]}
+            self.assertEqual(result, {"EC8 Edge Crew": ["betting", "ec"]})
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python -m unittest tests.<module>
+python -m unittest tests.test_config -v
 ```
 
 Expected: `ModuleNotFoundError: No module named 'scripts.config'`
@@ -177,7 +186,7 @@ def load_project_domain_map(project_root: Path) -> dict[str, list[str]]:
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python -m unittest tests.<module>
+python -m unittest tests.test_config -v
 ```
 
 Expected: PASS
@@ -205,27 +214,33 @@ git commit -m "feat: load project-to-domain mapping config"
 `tests/test_profile_reader.py`:
 
 ```python
+import tempfile
+import unittest
 from pathlib import Path
 
 from scripts.profile_reader import read_profile_section
 
 
-def test_read_profile_section(tmp_path: Path):
-    profile_dir = tmp_path / "profile"
-    profile_dir.mkdir()
-    (profile_dir / "lares-profile.md").write_text(
-        "# Lares Profile\n\n## Persona\nGuardian.\n", encoding="utf-8"
-    )
+class TestProfileReader(unittest.TestCase):
+    def test_read_profile_section(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            profile_dir = tmp_path / "profile"
+            profile_dir.mkdir()
+            (profile_dir / "lares-profile.md").write_text(
+                "# Lares Profile\n\n## Persona\nGuardian.\n",
+                encoding="utf-8",
+            )
 
-    result = read_profile_section(tmp_path, "lares-profile", "Persona")
+            result = read_profile_section(tmp_path, "lares-profile", "Persona")
 
-    assert "Guardian." in result
+            self.assertIn("Guardian.", result)
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python -m unittest tests.<module>
+python -m unittest tests.test_profile_reader -v
 ```
 
 Expected: `ModuleNotFoundError` or `function not defined`
@@ -254,7 +269,7 @@ def read_profile_section(project_root: Path, profile_name: str, section_name: st
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python -m unittest tests.<module>
+python -m unittest tests.test_profile_reader -v
 ```
 
 Expected: PASS
@@ -282,35 +297,39 @@ git commit -m "feat: read profile sections by heading"
 `tests/test_project_parser.py`:
 
 ```python
+import tempfile
+import unittest
 from pathlib import Path
 
 from scripts.project_parser import parse_project_profile
 
 
-def test_parse_project_profile(tmp_path: Path):
-    profile_path = tmp_path / "EC8 Edge Crew.md"
-    profile_path.write_text(
-        "# Profile: EC8 Edge Crew\r\n"
-        "Generated: 2026-07-06\r\n"
-        "Conversations: 5\r\n"
-        "\r\n"
-        "## Summary\r\n"
-        "- **Edge** (account1, 10 messages)\r\n"
-        "- **Take the shot** (account1, 5 messages)\r\n",
-        encoding="utf-8",
-    )
+class TestProjectProfileParser(unittest.TestCase):
+    def test_parse_project_profile(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            profile_path = Path(tmp) / "EC8 Edge Crew.md"
+            profile_path.write_text(
+                "# Profile: EC8 Edge Crew\r\n"
+                "Generated: 2026-07-06\r\n"
+                "Conversations: 5\r\n"
+                "\r\n"
+                "## Summary\r\n"
+                "- **Edge** (account1, 10 messages)\r\n"
+                "- **Take the shot** (account1, 5 messages)\r\n",
+                encoding="utf-8",
+            )
 
-    result = parse_project_profile(profile_path)
+            result = parse_project_profile(profile_path)
 
-    assert result["title"] == "EC8 Edge Crew"
-    assert result["conversations"] == "5"
-    assert "Edge" in result["summary"]
+            self.assertEqual(result["title"], "EC8 Edge Crew")
+            self.assertEqual(result["conversations"], "5")
+            self.assertIn("Edge", result["summary"])
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python -m unittest tests.<module>
+python -m unittest tests.test_project_parser -v
 ```
 
 Expected: `ModuleNotFoundError`
@@ -352,7 +371,7 @@ def parse_project_profile(profile_path: Path) -> dict[str, str | list[str]]:
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python -m unittest tests.<module>
+python -m unittest tests.test_project_parser -v
 ```
 
 Expected: PASS
@@ -380,36 +399,40 @@ git commit -m "feat: parse kimi-chat-scraper project profile"
 `tests/test_domain_reader.py`:
 
 ```python
+import tempfile
+import unittest
 from pathlib import Path
 
 from scripts.domain_reader import read_domain_pack
 
 
-def test_read_domain_pack(tmp_path: Path):
-    domain_path = tmp_path / "betting.md"
-    domain_path.write_text(
-        "# Lares — Betting Threads\n\n"
-        "- **Thread count:** 744\n"
-        "- **Route:** ec4-edge-crew-notes\n\n"
-        "## Sources\n\n"
-        "- Apps: claude, kimi\n\n"
-        "## Thread snippets\n\n"
-        "- `/a`: Edge crew odds...\n",
-        encoding="utf-8",
-    )
+class TestDomainReader(unittest.TestCase):
+    def test_read_domain_pack(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            domain_path = Path(tmp) / "betting.md"
+            domain_path.write_text(
+                "# Lares — Betting Threads\n\n"
+                "- **Thread count:** 744\n"
+                "- **Route:** ec4-edge-crew-notes\n\n"
+                "## Sources\n\n"
+                "- Apps: claude, kimi\n\n"
+                "## Thread snippets\n\n"
+                "- `/a`: Edge crew odds...\n",
+                encoding="utf-8",
+            )
 
-    result = read_domain_pack(domain_path)
+            result = read_domain_pack(domain_path)
 
-    assert result["count"] == "744"
-    assert result["route"] == "ec4-edge-crew-notes"
-    assert "claude" in result["sources"]
-    assert "Edge crew odds" in result["snippets"]
+            self.assertEqual(result["count"], "744")
+            self.assertEqual(result["route"], "ec4-edge-crew-notes")
+            self.assertIn("claude", result["sources"])
+            self.assertIn("Edge crew odds", result["snippets"])
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python -m unittest tests.<module>
+python -m unittest tests.test_domain_reader -v
 ```
 
 Expected: `ModuleNotFoundError`
@@ -448,7 +471,7 @@ def read_domain_pack(domain_md_path: Path) -> dict[str, str | list[str]]:
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python -m unittest tests.<module>
+python -m unittest tests.test_domain_reader -v
 ```
 
 Expected: PASS
@@ -467,9 +490,6 @@ git commit -m "feat: read Lares domain pack markdown summaries"
 **Files:**
 - Create: `scripts/build_starter.py`
 - Create: `tests/test_build_starter.py`
-- Create: `tests/fixtures/lares-profile/profile/lares-profile.md`
-- Create: `tests/fixtures/kimi-chat-scraper/profiles/EC8 Edge Crew.md`
-- Create: `tests/fixtures/lares-profile/extracted/by-domain/betting.md`
 
 **Interfaces:**
 - Consumes: `load_project_domain_map`, `read_profile_section`, `parse_project_profile`, `read_domain_pack`
@@ -480,60 +500,78 @@ git commit -m "feat: read Lares domain pack markdown summaries"
 `tests/test_build_starter.py`:
 
 ```python
+import tempfile
+import unittest
 from pathlib import Path
 
 from scripts.build_starter import build_starter
 
 
-def _write(path: Path, text: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(text, encoding="utf-8")
+class TestBuildStarter(unittest.TestCase):
+    def _write(self, path: Path, text: str) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
 
+    def test_build_starter(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            self._write(
+                tmp_path / "config" / "project_domain_map.json",
+                '{"EC8 Edge Crew": ["betting"]}',
+            )
+            self._write(
+                tmp_path / "profile" / "outside-brain-profile.md",
+                "# outside-brain Profile\n\nTwin.\n",
+            )
 
-def test_build_starter(tmp_path: Path):
-    # Arrange: create a minimal twin workspace inside tmp_path
-    _write(tmp_path / "config" / "project_domain_map.json", '{"EC8 Edge Crew": ["betting"]}')
-    _write(
-        tmp_path / "profile" / "outside-brain-profile.md",
-        "# outside-brain Profile\n\nTwin.\n",
-    )
-    _write(
-        tmp_path / "profile" / "lares-profile.md",
-        "# Lares Profile\n\n## Persona\nGuardian.\n",
-    )
-    _write(
-        tmp_path / "profile" / "lares-voice.md",
-        "# Lares Voice\n\nDirect.\n",
-    )
-    _write(
-        tmp_path / "profile" / "lares-memory.md",
-        "# Lares Memory\n\nDomain packs linked.\n",
-    )
-    _write(
-        tmp_path / ".." / "kimi-chat-scraper" / "profiles" / "EC8 Edge Crew.md",
-        "# Profile: EC8 Edge Crew\r\nConversations: 5\r\n\r\n## Summary\r\n- **Edge** (account1, 10 messages)\r\n",
-    )
-    _write(
-        tmp_path / ".." / "lares-profile" / "extracted" / "by-domain" / "betting.md",
-        "# Lares — Betting Threads\n\n- **Thread count:** 744\n- **Route:** ec4-edge-crew-notes\n\n## Sources\n\n- Apps: claude, kimi\n\n## Thread snippets\n\n- `/a`: Edge crew odds...\n",
-    )
+            lares_root = tmp_path / ".." / "lares-profile"
+            self._write(
+                lares_root / "profile" / "lares-profile.md",
+                "# Lares Profile\n\n## Persona\nGuardian.\n",
+            )
+            self._write(
+                lares_root / "profile" / "lares-voice.md",
+                "# Lares Voice\n\nDirect.\n",
+            )
+            self._write(
+                lares_root / "profile" / "lares-memory.md",
+                "# Lares Memory\n\nDomain packs linked.\n",
+            )
+            self._write(
+                lares_root / "extracted" / "by-domain" / "betting.md",
+                "# Lares — Betting Threads\n\n"
+                "- **Thread count:** 744\n"
+                "- **Route:** ec4-edge-crew-notes\n\n"
+                "## Sources\n\n"
+                "- Apps: claude, kimi\n\n"
+                "## Thread snippets\n\n"
+                "- `/a`: Edge crew odds...\n",
+            )
 
-    result = build_starter(tmp_path, "EC8 Edge Crew")
+            scraper_root = tmp_path / ".." / "ACTIVE" / "kimi-chat-scraper"
+            self._write(
+                scraper_root / "profiles" / "EC8 Edge Crew.md",
+                "# Profile: EC8 Edge Crew\r\n"
+                "Conversations: 5\r\n"
+                "\r\n"
+                "## Summary\r\n"
+                "- **Edge** (account1, 10 messages)\r\n",
+            )
 
-    assert result.exists()
-    content = result.read_text(encoding="utf-8")
-    assert "EC8 Edge Crew" in content
-    assert "Guardian." in content
-    assert "Edge crew odds" in content
-    assert "pending-review" in str(result)
+            result = build_starter(tmp_path, "EC8 Edge Crew")
+
+            self.assertTrue(result.exists())
+            content = result.read_text(encoding="utf-8")
+            self.assertIn("EC8 Edge Crew", content)
+            self.assertIn("Guardian.", content)
+            self.assertIn("Edge crew odds", content)
+            self.assertIn("pending-review", str(result))
 ```
-
-Note: This test uses `tmp_path / ".."` to place external fixture roots. Ensure the test uses absolute paths; `tmp_path` is absolute.
 
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python -m unittest tests.<module>
+python -m unittest tests.test_build_starter -v
 ```
 
 Expected: `ModuleNotFoundError` for `scripts.build_starter`
@@ -661,7 +699,7 @@ if __name__ == "__main__":
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python -m unittest tests.<module>
+python -m unittest tests.test_build_starter -v
 ```
 
 Expected: PASS
@@ -669,7 +707,7 @@ Expected: PASS
 - [ ] **Step 5: Run full test suite**
 
 ```bash
-python -m unittest tests.<module>
+python -m unittest discover tests -v
 ```
 
 Expected: all tests pass
