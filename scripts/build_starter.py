@@ -28,7 +28,7 @@ def build_starter(project_root: Path, project_name: str) -> Path:
 
     lines = [
         f"# Chat Starter: {project_name}",
-        f"Generated: {now.isoformat()}Z",
+        f"Generated: {now.strftime('%Y-%m-%dT%H:%M:%SZ')}",
         "",
         "## Lares Persona & Voice",
         "",
