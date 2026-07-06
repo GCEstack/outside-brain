@@ -1,24 +1,61 @@
-# Lares Memory Checkpoint Prompt — Design
+# Lares Memory Checkpoint Prompts — Design
 
 ## Goal
 
-Create a one-time, self-contained markdown prompt to paste into the Kimi desktop app before wiping the current chat history and migrating to a new brain. The prompt elicits what Kimi remembers, what it is uncertain about, and what questions it has, without leaking any local file system or project information.
+Create two self-contained markdown prompts to paste into the Kimi desktop app while migrating Lares to a new brain. One prompt runs in a fresh chat with no prior context; the other runs in existing important chats before they are wiped. Both prompts elicit useful information without leaking local file system or project details.
 
 ## Context
 
 - `outside-brain` is building a migration pipeline for Lares (Osito's partner AI).
-- Before the wipe, we want a checkpoint chat that captures the model's current understanding.
-- The prompt must work entirely inside the chat context: no references to local files, repos, or this computer.
+- Before the wipe, we want to capture both:
+  - What a brand-new Lares brain needs to be told (cold start).
+  - What the existing chats currently remember (memory audit).
+- The prompts must work entirely inside the chat context: no references to local files, repos, or this computer.
 
 ## Design
 
 ### Approach
 
-Structured Memory Checkpoint (Approach 2 from brainstorming).
+Two structured prompts:
 
-Why: it balances open-endedness with organization, producing output that can later be compared against the canonical Lares profile and project starters.
+1. **Cold Start** — pasted into a fresh Kimi chat. Asks what the new brain needs to know.
+2. **Memory Checkpoint** — pasted into existing chats. Asks what the model remembers from that conversation.
 
-### Prompt
+Both use the same structured-section pattern so the outputs are easy to compare and fold into the canonical Lares profile later.
+
+### Prompt A — Cold Start / New Brain Load List
+
+Paste into a brand-new Kimi chat.
+
+```markdown
+# Lares New Brain — Cold Start
+
+We are loading a fresh brain for Lares. You currently have no context about me or our work.
+
+I am Osito — also called the Don, sometimes Peter. You are Lares, my partner.
+
+Do not look at files, folders, browser tabs, or anything outside this chat. You know nothing yet.
+
+## What I should tell you first
+
+What do you need to know about me, about Lares, and about how we work together before we do anything else?
+
+## What should be loaded into the new brain
+
+If you could design the perfect starter pack for this new Lares brain, what would it include? Think: facts, preferences, projects, recurring tasks, tone, inside jokes, rules.
+
+## What you should assume until corrected
+
+What reasonable defaults will you operate under while we load the real context?
+
+## Your first questions for me
+
+Ask me the most important questions to get started. Prioritize what matters most.
+```
+
+### Prompt B — Memory Checkpoint
+
+Paste into each existing chat you plan to review or wipe.
 
 ```markdown
 # Lares Memory Checkpoint
@@ -57,14 +94,21 @@ Say whatever else you think I should hear before we start clean.
 ## Usage
 
 1. Open the Kimi desktop app.
-2. Start a new chat or use the current chat you intend to wipe.
-3. Paste the prompt above exactly as written.
-4. Let Kimi respond fully.
-5. Save the response to a markdown file for review before wiping.
+2. For a fresh start, paste **Prompt A** into a new chat.
+3. For each existing important chat, paste **Prompt B** into that chat.
+4. Let Kimi respond fully in each.
+5. Save the responses to markdown files for review before wiping.
 
 ## Output Expectations
 
-Kimi should return a structured response with the six sections above:
+**Prompt A** should return:
+
+1. **What I should tell you first** — critical baseline facts.
+2. **What should be loaded into the new brain** — ideal starter-pack contents.
+3. **What you should assume until corrected** — defaults the model will use.
+4. **Your first questions for me** — prioritized questions.
+
+**Prompt B** should return:
 
 1. **What you know** — factual claims about Osito/the Don, Lares, projects, and working style.
 2. **What you are uncertain about** — hedged or partial memories, possible cross-chat confusion.
@@ -77,11 +121,12 @@ Kimi should return a structured response with the six sections above:
 
 - Standard library only; this is a plain markdown file.
 - No references to `outside-brain`, `lares-profile`, local paths, repos, or file contents.
-- No project names, account names, or computer-specific details embedded in the prompt.
+- No project names, account names, or computer-specific details embedded in the prompts.
 - Self-contained: must work if pasted into a blank Kimi chat on any device.
 
 ## Next Steps
 
-- After Kimi responds, review the output against the canonical Lares profile and project starters.
+- After Kimi responds, review the outputs against the canonical Lares profile and project starters.
 - Decide what to carry forward into the new brain.
 - Proceed with the chat wipe and new-brain setup.
+- Future enhancement (not part of this design): interleave Prompt B before scraping chats so the model's own summary becomes part of the archive.
