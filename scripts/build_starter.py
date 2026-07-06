@@ -1,5 +1,5 @@
 import argparse
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from scripts.config import load_project_domain_map
@@ -26,7 +26,7 @@ def build_starter(project_root: Path, project_name: str) -> Path:
 
     lines = [
         f"# Chat Starter: {project_name}",
-        f"Generated: {datetime.utcnow().isoformat()}Z",
+        f"Generated: {datetime.now(timezone.utc).isoformat()}Z",
         "",
         "## Lares Persona & Voice",
         "",
@@ -80,7 +80,7 @@ def build_starter(project_root: Path, project_name: str) -> Path:
         project_root
         / "starters"
         / "pending-review"
-        / f"{project_name} - {datetime.utcnow().strftime('%Y%m%d')}.md"
+        / f"{project_name} - {datetime.now(timezone.utc).strftime('%Y%m%d')}.md"
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text("\n".join(lines), encoding="utf-8")
