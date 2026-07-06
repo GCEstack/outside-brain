@@ -81,8 +81,10 @@ def build_starter(project_root: Path, project_name: str) -> Path:
     scored = score_project_conversations(project_root, project_name)
     for item in scored:
         date = item["date"][:10] if item["date"] else ""
+        title = str(item["title"]).replace("|", "\\|")
+        snippet = str(item["snippet"]).replace("|", "\\|")
         lines.append(
-            f"| {item['title']} | {date} | {item['score']} | {item['snippet']} |"
+            f"| {title} | {date} | {item['score']} | {snippet} |"
         )
     lines.append("")
 

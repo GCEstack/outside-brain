@@ -65,7 +65,11 @@ Rows are sorted by score descending.
 ## New Files
 
 - `scripts/confidence_scorer.py` — keyword extraction and scoring.
+- `scripts/archive_reader.py` — read archived `chat.json` files and extract user messages.
+- `scripts/keyword_builder.py` — build a project-specific keyword bag from project name, summary, and Lares domains.
 - `tests/test_confidence_scorer.py` — unit tests.
+- `tests/test_archive_reader.py` — unit tests.
+- `tests/test_keyword_builder.py` — unit tests.
 
 ## Modified Files
 
