@@ -19,3 +19,27 @@ python scripts/build_starter.py --project "EC8 Edge Crew"
 ```
 
 Review the file, add your goal under "Goal for This Chat", then move it to `starters/ready-to-paste/`. Paste the contents into a new Kimi or Claude chat.
+
+# Purpose
+
+outside-brain — Active.
+
+# Status
+
+Active
+
+# Family Pod
+
+- Lead: Lares
+- Members: Vesta
+
+# Stack
+- Languages: Python
+
+# Backlog
+
+See [BACKLOG.md](BACKLOG.md).
+
+# Risks
+
+- TBD
